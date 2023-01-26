@@ -29,10 +29,23 @@ if (navigator.geolocation) {
                 }
             ).addTo(map);
 
-            L.marker(coords)
-                .addTo(map)
-                .bindPopup('A pretty CSS3 popup.<br> Easily customizable.')
-                .openPopup();
+            let i = 0;
+            map.on('click', mapEvent => {
+                const { lat, lng } = mapEvent.latlng;
+                const latlng = [lat, lng];
+                i++;
+                L.marker(latlng)
+                    .addTo(map)
+                    .bindPopup(
+                        L.popup({
+                            content: `Marker ${i}`,
+                            autoClose: false,
+                            closeOnClick: false,
+                            className: 'running-popup'
+                        })
+                    )
+                    .openPopup();
+            });
         },
         () => {
             alert('Could not get your position.');
