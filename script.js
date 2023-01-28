@@ -11,6 +11,45 @@ const inputDuration = document.querySelector('.form__input--duration');
 const inputCadence = document.querySelector('.form__input--cadence');
 const inputElevation = document.querySelector('.form__input--elevation');
 
+class Workout {
+    date = new Date();
+    id = Date.now();
+
+    constructor(coords, distance, duration) {
+        this.coords = coords;
+        this.distance = distance;
+        this.duration = duration;
+    }
+}
+
+class Running extends Workout {
+    constructor(coords, distance, duration, cadence) {
+        super(coords, distance, duration);
+        this.cadence = cadence;
+        this.calcPace;
+    }
+
+    get calcPace() {
+        this.pace = this.duration / this.distance;
+        return this.pace;
+    }
+}
+
+class Cycling extends Workout {
+    constructor(coords, distance, duration, elevationGain) {
+        super(coords, distance, duration);
+        this.elevationGain = elevationGain;
+        this.calcSpeed;
+    }
+
+    get calcSpeed() {
+        this.speed = this.distance / (this.duration / 60);
+        return this.speed;
+    }
+}
+
+/////////////////////////////////////////////////
+// ARCHITECTURE
 class App {
     #map;
     #mapEvent;
@@ -75,17 +114,7 @@ class App {
             .addTo(this.#map)
             .bindPopup(
                 L.popup({
-                    content: `Workout ${this.#i}\nDistance: ${
-                        inputDistance.value
-                    } km\nDuration: ${inputDuration.value} min\n${
-                        inputType.value === 'running'
-                            ? 'Cadence'
-                            : 'Elevation Gain'
-                    }: ${
-                        inputType.value === 'running'
-                            ? inputCadence.value + ' step/min'
-                            : inputElevation.value + ' meters'
-                    }`,
+                    content: `Workout ${this.#i}`,
                     autoClose: false,
                     closeOnClick: false,
                     className: `${inputType.value}-popup`
