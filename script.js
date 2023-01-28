@@ -11,6 +11,9 @@ const inputDuration = document.querySelector('.form__input--duration');
 const inputCadence = document.querySelector('.form__input--cadence');
 const inputElevation = document.querySelector('.form__input--elevation');
 
+let map,
+    mapEvent,
+    i = 0;
 if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(
         position => {
@@ -19,7 +22,7 @@ if (navigator.geolocation) {
 
             const coords = [latitude, longitude];
 
-            const map = L.map('map').setView(coords, 13);
+            map = L.map('map').setView(coords, 13);
 
             L.tileLayer(
                 'https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',
@@ -29,22 +32,10 @@ if (navigator.geolocation) {
                 }
             ).addTo(map);
 
-            let i = 0;
-            map.on('click', mapEvent => {
-                const { lat, lng } = mapEvent.latlng;
-                const latlng = [lat, lng];
-                i++;
-                L.marker(latlng)
-                    .addTo(map)
-                    .bindPopup(
-                        L.popup({
-                            content: `Marker ${i}`,
-                            autoClose: false,
-                            closeOnClick: false,
-                            className: 'running-popup'
-                        })
-                    )
-                    .openPopup();
+            map.on('click', mapE => {
+                mapEvent = mapE;
+                form.classList.remove('hidden');
+                inputDistance.focus();
             });
         },
         () => {
@@ -52,3 +43,43 @@ if (navigator.geolocation) {
         }
     );
 }
+
+form.addEventListener('submit', e => {
+    e.preventDefault();
+    const { lat, lng } = mapEvent.latlng;
+    const latlng = [lat, lng];
+    i++;
+
+    L.marker(latlng)
+        .addTo(map)
+        .bindPopup(
+            L.popup({
+                content: `Workout ${i}\nDistance: ${
+                    inputDistance.value
+                } km\nDuration: ${inputDuration.value} min\n${
+                    inputType.value === 'running' ? 'Cadence' : 'Elevation Gain'
+                }: ${
+                    inputType.value === 'running'
+                        ? inputCadence.value + ' step/min'
+                        : inputElevation.value + ' meters'
+                }`,
+                autoClose: false,
+                closeOnClick: false,
+                className: `${inputType.value}-popup`
+            })
+        )
+        .openPopup();
+
+    inputDistance.value =
+        inputDuration.value =
+        inputCadence.value =
+        inputElevation.value =
+            '';
+
+    form.classList.add('hidden');
+});
+
+inputType.addEventListener('change', () => {
+    inputElevation.closest('.form__row').classList.toggle('form__row--hidden');
+    inputCadence.closest('.form__row').classList.toggle('form__row--hidden');
+});
