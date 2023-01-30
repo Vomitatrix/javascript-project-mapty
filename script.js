@@ -104,6 +104,7 @@ class App {
         }).addTo(this.#map);
 
         this.#map.on('click', this.#showForm.bind(this));
+        this.#getLocalStorage();
     }
 
     #showForm(mapE) {
@@ -182,6 +183,7 @@ class App {
         this.#renderWorkoutMarker(workout);
         this.#renderWorkout(workout);
         this.#hideForm();
+        this.#setLocalStorage();
     }
 
     #renderWorkoutMarker(workout) {
@@ -263,6 +265,27 @@ class App {
         );
 
         this.#map.setView(workout.coords, this.#mapZoomLevel);
+    }
+
+    #setLocalStorage() {
+        localStorage.setItem('workouts', JSON.stringify(this.#workouts));
+    }
+
+    #getLocalStorage() {
+        const data = JSON.parse(localStorage.getItem('workouts'));
+
+        if (!data) return;
+
+        this.#workouts = data;
+        this.#workouts.forEach(work => {
+            this.#renderWorkout(work);
+            this.#renderWorkoutMarker(work);
+        });
+    }
+
+    static get reset() {
+        localStorage.removeItem('workouts');
+        location.reload();
     }
 }
 
