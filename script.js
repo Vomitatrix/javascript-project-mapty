@@ -10,7 +10,7 @@ const inputElevation = document.querySelector('.form__input--elevation');
 
 class Workout {
     date = new Date();
-    id = Date.now();
+    id = Date.now() + '';
 
     constructor(coords, distance, duration) {
         this.coords = coords;
@@ -64,6 +64,7 @@ class Cycling extends Workout {
 // ARCHITECTURE
 class App {
     #map;
+    #mapZoomLevel = 13;
     #mapEvent;
     #workouts = [];
 
@@ -72,6 +73,10 @@ class App {
 
         form.addEventListener('submit', this.#newWorkout.bind(this));
         inputType.addEventListener('change', this.#toggleElevationField);
+        containerWorkouts.addEventListener(
+            'click',
+            this.#moveToPopup.bind(this)
+        );
     }
 
     #getPosition() {
@@ -91,7 +96,7 @@ class App {
 
         const coords = [latitude, longitude];
 
-        this.#map = L.map('map').setView(coords, 13);
+        this.#map = L.map('map').setView(coords, this.#mapZoomLevel);
 
         L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
             attribution:
@@ -246,6 +251,18 @@ class App {
         }
 
         form.insertAdjacentHTML('afterend', html);
+    }
+
+    #moveToPopup(e) {
+        const workoutEl = e.target.closest('.workout');
+
+        if (!workoutEl) return;
+
+        const workout = this.#workouts.find(
+            work => work.id === workoutEl.dataset.id
+        );
+
+        this.#map.setView(workout.coords, this.#mapZoomLevel);
     }
 }
 
